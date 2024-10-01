@@ -3,27 +3,40 @@ import matplotlib.pyplot as plt
 import os
 from autoencoder import VAE
 
-def load_fsdd(spectrograms_path):
+os.chdir("G:/UTS/2024/Spring_2024/Advance Data Algorithm and Machine Learning/DataGeneration-VAE/Instrument Sound Generation")
+
+
+def load_InstrumentData(spectrograms_path):
     x_train = []
     X_labels = []
     for root, _, file_names in os.walk(spectrograms_path):
         for file_name in file_names:
             file_path = os.path.join(root, file_name)
-            X_label = file_name[0]
-            spectrogram = np.load(file_path) # (n_bins, n_frames, 1)
+            X_label = file_name.split('_')[0]
+            spectrogram = np.load(file_path) # (n_bins, n_frames)
             x_train.append(spectrogram)
-            X_labels.append(int(X_label))
+            X_labels.append(X_label)
+
     x_train = np.array(x_train)
-    x_train = x_train[..., np.newaxis] # -> (3000, 256, 64, 1)
+    # add a channel
+    x_train = x_train[..., np.newaxis] # -> (2452, 256, 128, 1)
     return x_train, X_labels
 
 
-def select_images(images, labels, num_images=10):
-    sample_images_index = np.random.choice(range(len(images)), num_images)
-    sample_images = images[sample_images_index]
-    sample_labels = np.array(labels)[sample_images_index]
-    return sample_images, sample_labels
 
+def select_images(images, labels, num_images=10):
+    # Standardize all variations of "Violin" to "Violin"
+    standardized_labels = ["Violin" if label.lower() == "violin" else label for label in labels]
+    # Filter images based on the instrument names
+    instrument_keywords = ["Drum", "Guitar", "Piano", "Violin", "violin", "VIOLIN"]
+    filtered_indices = [i for i, label in enumerate(standardized_labels) if any(keyword in label for keyword in instrument_keywords)]  
+    # Randomly select indices from the filtered list
+    sample_images_index = np.random.choice(filtered_indices, num_images, replace=False)   
+    # Select the images and labels based on the sampled indices
+    sample_images = images[sample_images_index]
+    sample_labels = np.array(standardized_labels)[sample_images_index]
+
+    return sample_images, sample_labels
 
 
 # Function to plot original and reconstructed images side by side
@@ -75,32 +88,89 @@ def plot_images_encoded_in_latent_space(latent_representations, sample_labels):
         latent_representations (numpy.ndarray): The encoded representations in latent space.
         sample_labels (numpy.ndarray): The labels corresponding to the encoded images.
     """
+    # Define a color map for the instruments
+    color_map = {
+        'Piano': 'red',
+        'Drum': 'blue',
+        'Guitar': 'green',
+        'Violin': 'purple'
+    }
+    
+    # Convert labels to colors
+    colors = [color_map[label] for label in sample_labels]
+    
     plt.figure(figsize=(10, 10))
-    plt.scatter(latent_representations[:, 0],  # Latent dimension 1
-                latent_representations[:, 1],  # Latent dimension 2
-                cmap="rainbow",  # Color map for the points
-                c=sample_labels,  # Color the points based on their labels
-                alpha=0.5,  # Transparency of points
-                s=2)  # Size of points
-    plt.colorbar()  # Add a color bar to show the class-color relationship
+    scatter = plt.scatter(latent_representations[:, 0],  # Latent dimension 1
+                          latent_representations[:, 1],  # Latent dimension 2
+                          c=colors,  # Color the points based on their labels
+                          alpha=0.5,  # Transparency of points
+                          s=50)  # Size of points
+    
+    # Create a legend
+    handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color, markersize=10, label=label)
+               for label, color in color_map.items()]
+    plt.legend(handles=handles, title="Instruments")
+    
     plt.title("Latent Space Representation of Test Images", fontsize=16)  # Plot title
     plt.xlabel("Latent Dimension 1")  # Label for x-axis
     plt.ylabel("Latent Dimension 2")  # Label for y-axis
     plt.show()
+
+# Function to plot the latent space representation of images in 3D
+def plot_images_encoded_in_3Dlatent_space(latent_representations, sample_labels):
+    """
+    Plot the encoded images in the 3D latent space, colored by their labels.
+    
+    Parameters:
+        latent_representations (numpy.ndarray): The encoded representations in latent space.
+        sample_labels (numpy.ndarray): The labels corresponding to the encoded images.
+    """
+    # Define a color map for the instruments
+    color_map = {
+        'Piano': 'red',
+        'Drum': 'blue',
+        'Guitar': 'green',
+        'Violin': 'purple'
+    }
+    
+    # Convert labels to colors
+    colors = [color_map[label] for label in sample_labels]
+    
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot(111, projection='3d')
+    scatter = ax.scatter(latent_representations[:, 0],  # Latent dimension 1
+                         latent_representations[:, 1],  # Latent dimension 2
+                         latent_representations[:, 2],  # Latent dimension 3
+                         c=colors,  # Color the points based on their labels
+                         alpha=0.5,  # Transparency of points
+                         s=50)  # Size of points
+    
+    # Create a legend
+    handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color, markersize=10, label=label)
+               for label, color in color_map.items()]
+    ax.legend(handles=handles, title="Instruments")
+    
+    ax.set_title("Latent Space Representation of Test Images", fontsize=16)
+    ax.set_xlabel("Latent Dimension 1")
+    ax.set_ylabel("Latent Dimension 2")
+    ax.set_zlabel("Latent Dimension 3")
+    plt.show()
+
 
 
 if __name__ == "__main__":
     SPECTROGRAMS_PATH = "dataset/spectrograms"
 
     autoencoder = VAE.load("model")
-    x_train, X_labels = load_fsdd(SPECTROGRAMS_PATH)
+    x_train, X_labels = load_InstrumentData(SPECTROGRAMS_PATH)
 
 
-    num_images = 10000
+    num_images = 25
     sample_images, sample_labels = select_images(x_train, X_labels, num_images)
     _, latent_representations = autoencoder.reconstruct(sample_images)
     plot_images_encoded_in_latent_space(latent_representations, sample_labels)
-
+    print("Latent space representation shape: ", latent_representations.shape)
+    plot_images_encoded_in_3Dlatent_space(latent_representations, sample_labels)
 
 
 

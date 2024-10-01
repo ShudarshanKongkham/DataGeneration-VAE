@@ -72,11 +72,12 @@ class VAE:
 
 
     def train(self, x_train, batch_size, num_epochs):
-        self.model.fit(x_train,
+        history = self.model.fit(x_train,
                        x_train,
                        batch_size=batch_size,
                        epochs=num_epochs,
                        shuffle=True)
+        return history
 
     def save(self, save_folder="."):
         self._create_folder_if_it_doesnt_exist(save_folder)

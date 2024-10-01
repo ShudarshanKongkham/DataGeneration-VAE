@@ -5,7 +5,7 @@ from autoencoder import VAE
 os.chdir("G:/UTS/2024/Spring_2024/Advance Data Algorithm and Machine Learning/DataGeneration-VAE/Instrument Sound Generation")
 LEARNING_RATE = 0.0005
 BATCH_SIZE = 4
-EPOCHS = 2
+EPOCHS = 350
 
 SPECTROGRAMS_PATH = "dataset/spectrograms"
 
@@ -34,12 +34,36 @@ def train(x_train, learning_rate, batch_size, epochs):
     )
     autoencoder.summary()
     autoencoder.compile(learning_rate)
-    autoencoder.train(x_train, batch_size, epochs)
-    return autoencoder
+    history = autoencoder.train(x_train, batch_size, epochs)
+    return autoencoder, history
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def save_history_and_plot(history, csv_filename='training_history.csv', plot_filename='loss_curve.png'):
+    # Convert the history.history dict to a DataFrame
+    history_df = pd.DataFrame(history.history)
+    
+    # Save the DataFrame to a CSV file
+    history_df.to_csv(csv_filename, index=False)
+    
+    # Plot the loss curve
+    plt.figure(figsize=(10, 6))
+    plt.plot(history_df['loss'], label='Training Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.title('Training Loss Curve')
+    plt.legend()
+    plt.grid(True)
+    
+    # Save the plot as an image file
+    plt.savefig(plot_filename)
+    plt.close()
 
 
 if __name__ == "__main__":
     x_train = load_InstrumentData(SPECTROGRAMS_PATH)
     print(x_train.shape)
-    autoencoder = train(x_train, LEARNING_RATE, BATCH_SIZE, EPOCHS)
+    autoencoder, history = train(x_train, LEARNING_RATE, BATCH_SIZE, EPOCHS)
     autoencoder.save("model")
+    save_history_and_plot(history)
