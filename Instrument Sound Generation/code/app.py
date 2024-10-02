@@ -216,7 +216,7 @@ class LatentSpaceExplorer(tk.Tk):
 
         # Plot spectrogram
         self.spec_ax.clear()
-        self.spec_ax.imshow(np.flipud(spectrogram_2d.T), aspect='auto', origin='lower', cmap='viridis')
+        self.spec_ax.imshow(np.flipud(spectrogram_2d.T), aspect='auto', origin='lower', cmap='inferno')
         self.spec_ax.set_title('Spectrogram')
         self.spec_canvas.draw()
 
