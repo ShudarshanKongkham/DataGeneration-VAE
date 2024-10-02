@@ -4,3 +4,6 @@ Instrument Sound Generation/dataset
 .vscode
 __pycache__
 Instrument Sound Generation/archive.zip
+Instrument Sound Generation/samples/generated
+Instrument Sound Generation/samples/original
+SoundGeneration_Z/dataset

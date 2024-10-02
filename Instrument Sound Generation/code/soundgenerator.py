@@ -29,7 +29,9 @@ class SoundGenerator:
             # log spectrogram -> spectrogram
             spec = librosa.db_to_amplitude(denorm_log_spec)
             # apply Griffin-Lim
-            signal = librosa.istft(spec, hop_length=self.hop_length)
+            # signal = librosa.istft(spec, hop_length=self.hop_length)
+            signal = librosa.griffinlim(spec, hop_length=self.hop_length, n_iter=128)
+
             # append signal to "signals"
             signals.append(signal)
         return signals

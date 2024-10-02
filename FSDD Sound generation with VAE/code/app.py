@@ -83,8 +83,8 @@ class LatentSpaceExplorer(tk.Tk):
 
         # Reduce dimensions for plotting
         # Option 1: Using PCA
-        pca = PCA(n_components=2)
-        self.latent_2d = pca.fit_transform(latent_representations)
+        self.pca = PCA(n_components=2)
+        self.latent_2d = self.pca.fit_transform(latent_representations)
 
         # Option 2: Using t-SNE (comment out PCA and uncomment t-SNE if preferred)
         # tsne = TSNE(n_components=2, perplexity=30, n_iter=300)
@@ -116,8 +116,13 @@ class LatentSpaceExplorer(tk.Tk):
 
     def generate_audio(self, clicked_point):
         # Find the nearest neighbor in the latent space
-        distance, index = self.kdtree.query(clicked_point)
-        latent_vector = self.latent_representations_full[index].reshape(1, -1)
+        # distance, index = self.kdtree.query(clicked_point)
+        # latent_vector = self.latent_representations_full[index].reshape(1, -1)
+        """Generate new sound from latent space """
+        # Convert clicked point back to the original latent space dimensions
+        latent_vector_2d = np.array(clicked_point).reshape(1, -1)
+        # Inverse PCA transformation
+        latent_vector = self.pca.inverse_transform(latent_vector_2d)
         # Generate spectrogram from latent vector
         generated_spectrogram = self.vae.decoder.predict(latent_vector)
         # Since the generator expects min_max_values, we'll use average min and max
