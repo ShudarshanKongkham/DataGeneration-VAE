@@ -37,6 +37,9 @@ class SoundGenerator:
             # Reconstruct the time-domain signal using the Griffin-Lim algorithm
             # signal = librosa.istft(spec, hop_length=self.hop_length)
             signal = librosa.griffinlim(spec, hop_length=self.hop_length, n_iter=64)
+            signal = np.nan_to_num(signal, nan=0.0)
+            signal = np.nan_to_num(signal, posinf=1e6, neginf=-1e6)
+
             # Append the signal to the list
             signals.append(signal)
         return signals

@@ -114,7 +114,7 @@ if __name__ == "__main__":
     plot_reconstructed_images(sample_images, reconstructed_images)
 
     # Select a large sample of images for plotting in the latent space
-    num_images = 6000
+    num_images = 9999
     sample_images, sample_labels = select_images(x_test, y_test, num_images)
     
     # Get the latent representations of the sample images

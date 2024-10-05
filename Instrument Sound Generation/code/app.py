@@ -22,28 +22,51 @@ SAMPLE_RATE = 22050
 
 
 def load_InstrumentData(spectrograms_path):
+    """
+    Load instrument spectrograms and their labels from the dataset.
+
+    Parameters:
+        spectrograms_path (str): Path to the directory containing spectrograms.
+
+    Returns:
+        x_train (np.ndarray): Array of spectrogram data.
+        X_labels (list): List of instrument labels corresponding to the spectrograms.
+    """
     x_train = []
     X_labels = []
     for root, _, file_names in os.walk(spectrograms_path):
         for file_name in file_names:
             file_path = os.path.join(root, file_name)
             X_label = file_name.split('_')[0]
-            spectrogram = np.load(file_path)  # (n_bins, n_frames)
+            spectrogram = np.load(file_path)  # Shape: (n_bins, n_frames)
             x_train.append(spectrogram)
             X_labels.append(X_label)
 
     x_train = np.array(x_train)
-    # add a channel
-    x_train = x_train[..., np.newaxis]  # -> (num_samples, n_bins, n_frames, 1)
+    # Add a channel dimension for compatibility with the model input
+    x_train = x_train[..., np.newaxis]  # Shape: (num_samples, n_bins, n_frames, 1)
     return x_train, X_labels
 
 
 def select_images(images, labels, num_images=10):
+    """
+    Select a subset of images and labels for visualization.
+
+    Parameters:
+        images (np.ndarray): Array of spectrogram images.
+        labels (list): List of labels corresponding to the images.
+        num_images (int): Number of images to select.
+
+    Returns:
+        sample_images (np.ndarray): Selected spectrogram images.
+        sample_labels (np.ndarray): Corresponding labels.
+    """
     # Standardize all variations of "Violin" to "Violin"
-    standardized_labels = ["Violin" if label.lower() == "violin" else label for label in labels]
+    standardized_labels = [label.capitalize() for label in labels]
     # Filter images based on the instrument names
     instrument_keywords = ["Drum", "Guitar", "Piano", "Violin"]
-    filtered_indices = [i for i, label in enumerate(standardized_labels) if any(keyword.lower() in label.lower() for keyword in instrument_keywords)]
+    filtered_indices = [i for i, label in enumerate(standardized_labels)
+                        if any(keyword.lower() in label.lower() for keyword in instrument_keywords)]
     # Randomly select indices from the filtered list
     sample_images_index = np.random.choice(filtered_indices, num_images, replace=False)
     # Select the images and labels based on the sampled indices
@@ -54,6 +77,10 @@ def select_images(images, labels, num_images=10):
 
 
 class LatentSpaceExplorer(tk.Tk):
+    """
+    GUI application to explore the latent space of a Variational Autoencoder (VAE)
+    trained on instrument spectrograms.
+    """
     def __init__(self):
         super().__init__()
         self.title("Latent Space Explorer")
@@ -63,6 +90,9 @@ class LatentSpaceExplorer(tk.Tk):
         self.plot_latent_space()
 
     def create_widgets(self):
+        """
+        Create and layout the widgets in the GUI.
+        """
         # Create main frame
         main_frame = tk.Frame(self)
         main_frame.pack(fill=tk.BOTH, expand=True)
@@ -110,6 +140,9 @@ class LatentSpaceExplorer(tk.Tk):
         self.stop_button.pack(side=tk.LEFT, padx=5)
 
     def load_model(self):
+        """
+        Load the VAE model and necessary data for the application.
+        """
         # Load the VAE model
         self.vae = VAE.load("model")
         self.sound_generator = SoundGenerator(self.vae, HOP_LENGTH)
@@ -126,10 +159,18 @@ class LatentSpaceExplorer(tk.Tk):
         self.latent_dim = self.vae.encoder.output_shape[-1]
 
     def get_latent_representations(self):
+        """
+        Get latent representations of sample spectrograms.
+
+        Returns:
+            latent_representations (np.ndarray): Latent vectors of the sample spectrograms.
+            sample_labels (np.ndarray): Corresponding labels.
+        """
         # Load data
         x_train, X_labels = load_InstrumentData(SPECTROGRAMS_PATH)
-        num_images = 28
+        num_images = 28  # Number of images to select for visualization
         sample_images, sample_labels = select_images(x_train, X_labels, num_images)
+        # Get latent representations
         _, latent_representations = self.vae.reconstruct(sample_images)
 
         # Reduce dimensions for plotting using PCA
@@ -140,6 +181,9 @@ class LatentSpaceExplorer(tk.Tk):
         return latent_representations, sample_labels
 
     def plot_latent_space(self):
+        """
+        Plot the latent space in 3D, color-coded by instrument labels.
+        """
         # Define a color map for the instruments
         color_map = {
             'Piano': 'red',
@@ -149,7 +193,7 @@ class LatentSpaceExplorer(tk.Tk):
         }
 
         # Convert labels to colors
-        colors = [color_map[label] for label in self.sample_labels]
+        colors = [color_map.get(label, 'black') for label in self.sample_labels]
 
         scatter = self.ax.scatter(
             self.latent_3d[:, 0],
@@ -161,6 +205,10 @@ class LatentSpaceExplorer(tk.Tk):
             picker=True
         )
         self.ax.set_title("Latent Space Representation")
+        self.ax.set_xlabel('Latent Dimension 1')
+        self.ax.set_ylabel('Latent Dimension 2')
+        self.ax.set_zlabel('Latent Dimension 3')
+
         # Create a legend
         handles = [plt.Line2D([0], [0], marker='o', color='w',
                               markerfacecolor=color, markersize=10, label=label)
@@ -169,11 +217,14 @@ class LatentSpaceExplorer(tk.Tk):
         self.canvas.draw()
 
     def generate_new_sound(self):
+        """
+        Generate a new sound by sampling a random point in the latent space.
+        """
         # Sample a latent vector from the standard normal distribution
         latent_vector = np.random.normal(size=(1, self.latent_dim))
         # Generate spectrogram from the latent vector
         generated_spectrogram = self.vae.decoder.predict(latent_vector)
-        # Remove batch dimension only
+        # Remove batch dimension
         generated_spectrogram = generated_spectrogram[0]
         # Use average min and max values for denormalization
         avg_min = np.mean([v["min"] for v in self.min_max_values.values()])
@@ -187,27 +238,38 @@ class LatentSpaceExplorer(tk.Tk):
         self.display_and_play_audio(signal, generated_spectrogram)
 
     def on_pick(self, event):
+        """
+        Event handler for picking a point in the latent space plot.
+
+        Generates and plays the corresponding sound.
+        """
         ind = event.ind
         if len(ind) > 0:
             index = ind[0]
             latent_vector = self.latent_representations_full[index].reshape(1, -1)
             # Generate spectrogram from latent vector
             generated_spectrogram = self.vae.decoder.predict(latent_vector)
-            # Remove batch dimension only
+            # Remove batch dimension
             generated_spectrogram = generated_spectrogram[0]
             # Use average min and max values for denormalization
             avg_min = np.mean([v["min"] for v in self.min_max_values.values()])
             avg_max = np.mean([v["max"] for v in self.min_max_values.values()])
             min_max_values = [{"min": avg_min, "max": avg_max}]
             # Convert spectrogram to audio
-            signals = self.sound_generator.convert_spectrograms_to_audio(
+            signal = self.sound_generator.convert_spectrograms_to_audio(
                 [generated_spectrogram], min_max_values
-            )
-            signal = signals[0]
+            )[0]
             # Display spectrogram and waveform, then play the audio
             self.display_and_play_audio(signal, generated_spectrogram)
 
     def display_and_play_audio(self, signal, spectrogram):
+        """
+        Display the waveform and spectrogram of the generated audio, and play the audio.
+
+        Parameters:
+            signal (np.ndarray): The audio signal.
+            spectrogram (np.ndarray): The spectrogram used to generate the audio.
+        """
         # Extract the 2D spectrogram for plotting
         if spectrogram.ndim == 3:
             spectrogram_2d = spectrogram[:, :, 0]
@@ -218,24 +280,33 @@ class LatentSpaceExplorer(tk.Tk):
         self.spec_ax.clear()
         self.spec_ax.imshow(np.flipud(spectrogram_2d.T), aspect='auto', origin='lower', cmap='inferno')
         self.spec_ax.set_title('Spectrogram')
+        self.spec_ax.set_xlabel('Time Frames')
+        self.spec_ax.set_ylabel('Frequency Bins')
         self.spec_canvas.draw()
 
         # Plot waveform
         self.wave_ax.clear()
-        self.wave_ax.plot(signal)
+        times = np.arange(len(signal)) / SAMPLE_RATE
+        self.wave_ax.plot(times, signal)
         self.wave_ax.set_title('Waveform')
+        self.wave_ax.set_xlabel('Time [s]')
+        self.wave_ax.set_ylabel('Amplitude')
         self.wave_canvas.draw()
 
         # Play the audio
         self.play_audio(signal)
 
-
-
     def play_audio(self, signal):
+        """
+        Play the audio signal using the sounddevice library.
+        """
         self.stop_audio()  # Stop any existing playback
         sd.play(signal, samplerate=SAMPLE_RATE)
 
     def stop_audio(self):
+        """
+        Stop any ongoing audio playback.
+        """
         sd.stop()
 
 
