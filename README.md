@@ -196,6 +196,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Feel free to explore the repository and experiment with generating new instrument sounds! 🎸🎹🎻🥁
 
-If you have any questions or need assistance, please contact [kongshan16@gmail.com] (mailto:kongshan16@gmail.com) or [shudarshan.s.kongkham@student.uts.edu.au] (mailto:shudarshan.s.kongkham@student.uts.edu.au).
+If you have any questions or need assistance, please contact [kongshan16@gmail.com](mailto:kongshan16@gmail.com) or [shudarshan.s.kongkham@student.uts.edu.au](mailto:shudarshan.s.kongkham@student.uts.edu.au).
 
 *Happy Sound Generating!*
