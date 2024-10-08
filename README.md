@@ -102,6 +102,7 @@ pip install -r requirements.txt
 
 *Note: Ensure that you have the necessary libraries installed, including TensorFlow, Keras, Librosa, NumPy, Matplotlib, and others specified in `requirements.txt`.*
 
+
 ## Usage
 
 ### 1. Preprocessing Audio Data
@@ -140,6 +141,8 @@ python src/generate.py
 ### 4. Interactive Application
 
 Launch the interactive application to explore the latent space and generate sounds in real-time.
+
+![Latent Space Explorer](3d_App.png)
 
 ```bash
 python src/app.py
@@ -191,8 +194,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Feel free to explore the repository and experiment with generating new instrument sounds!
+Feel free to explore the repository and experiment with generating new instrument sounds! 🎸🎹🎻🥁
 
-If you have any questions or need assistance, please contact [your.email@example.com](mailto:your.email@example.com).
+If you have any questions or need assistance, please contact [kongshan16@gmail.com] (mailto:kongshan16@gmail.com) or [shudarshan.s.kongkham@student.uts.edu.au] (mailto:shudarshan.s.kongkham@student.uts.edu.au).
 
 *Happy Sound Generating!*
