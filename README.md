@@ -190,7 +190,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   - [Librosa](https://librosa.org/)
   - [Matplotlib](https://matplotlib.org/)
   - [NumPy](https://numpy.org/)
-- **Inspiration**: This project was inspired by the potential of VAEs in audio synthesis and aims to contribute to the field of machine learning-based sound generation.
+- **Inspiration**: This project was inspired by the potential of VAEs in audio synthesis and aims to contribute to the field of machine learning-based sound generation. My gratitude to [Valerio Velardo](https://github.com/musikalkemist) for introducing me to Audio Signal Processing.
 
 ---
 
