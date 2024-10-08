@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import os
 from autoencoder import VAE
@@ -73,7 +74,7 @@ def plot_reconstructed_images(images, reconstructed_images, sample_labels, mse_v
         im3 = ax.imshow(error_image, cmap="bwr", aspect='auto')  # Using 'bwr' colormap to show positive and negative differences
         ax.set_title("Error \n(Orig. - Recons.)", fontsize=10)
         # Add a colorbar to the error image
-        plt.colorbar(im3, ax=ax, fraction=0.046, pad=0.04)
+        # plt.colorbar(im3, ax=ax, fraction=0.046, pad=0.04)
 
     plt.suptitle("Original vs Reconstructed Spectrograms and Error Images", fontsize=18)
     plt.tight_layout()
@@ -166,18 +167,51 @@ def calculate_evaluation_metrics(original_images, reconstructed_images):
         ssim_values.append(ssim_value)
     return mse_values, ssim_values
 
+def plot_LossCurve(log_filepath):
+    training_history = pd.read_csv(log_filepath)
+    # Extract data for the three loss components
+    epochs = range(len(training_history))
+    loss = training_history['loss']
+    reconstruction_loss = training_history['calculate_reconstruction_loss']
+    kl_loss = training_history['calculate_kl_loss']
+    # Plot the KL Loss and Reconstruction Loss separately
+    plt.figure(figsize=(10, 6))
+
+    # Plot KL loss
+    plt.subplot(2, 1, 1)
+    plt.plot(epochs, kl_loss, color='red')
+    plt.title('KL Loss over Epochs')
+    plt.xlabel('Epochs')
+    plt.ylabel('KL Loss')
+
+    # Plot Reconstruction loss
+    plt.subplot(2, 1, 2)
+    plt.plot(epochs, reconstruction_loss, color='orange')
+    plt.title('Reconstruction Loss over Epochs')
+    plt.xlabel('Epochs')
+    plt.ylabel('Reconstruction Loss')
+
+    # Adjust layout and show the plot
+    plt.tight_layout()
+    plt.show()
+
+
 if __name__ == "__main__":
     SPECTROGRAMS_PATH = "dataset/spectrograms"
+    HISTORY_LOG_PATH = "training_history.csv"
 
     # Load the pre-trained VAE model
     autoencoder = VAE.load("model")
     x_train, X_labels = load_InstrumentData(SPECTROGRAMS_PATH)
 
-    num_images = 10  # Adjust as needed
+    num_images = 8  # Adjust as needed
     sample_images, sample_labels = select_images(x_train, X_labels, num_images)
+
 
     # Reconstruct the images using the autoencoder
     reconstructed_images, latent_representations = autoencoder.reconstruct(sample_images)
+
+    plot_LossCurve(HISTORY_LOG_PATH)
 
     # Calculate evaluation metrics
     mse_values, ssim_values = calculate_evaluation_metrics(sample_images, reconstructed_images)
@@ -195,3 +229,5 @@ if __name__ == "__main__":
         plot_images_encoded_in_3Dlatent_space(latent_representations, sample_labels)
     else:
         print("Latent space has less than 3 dimensions. Cannot plot 3D latent space.")
+
+    

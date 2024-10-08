@@ -50,13 +50,14 @@ def select_spectrograms(spectrograms, file_paths, min_max_values, num_spectrogra
     sampled_file_paths = [file_paths[index] for index in sampled_indexes]
     sampled_file_paths = [str(Path(fp).as_posix()) for fp in sampled_file_paths]
     sampled_min_max_values = [min_max_values[fp] for fp in sampled_file_paths]
-    return sampled_spectrograms, sampled_min_max_values
+    return sampled_spectrograms, sampled_min_max_values, sampled_file_paths
 
-def save_signals(signals, save_dir, sample_rate=22050):
+
+def save_signals(signals, save_dir, filenames, sample_rate=22050):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-    for i, signal in enumerate(signals):
-        save_path = os.path.join(save_dir, f"{i}.wav")
+    for signal, name in zip(signals, filenames):
+        save_path = os.path.join(save_dir, f"{name[len('dataset/spectrograms/'):-4]}.wav")
         sf.write(save_path, signal, sample_rate)
 
 if __name__ == "__main__":
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     specs, file_paths = load_InstrumentData(SPECTROGRAMS_PATH)
 
     # Sample spectrograms and min-max values
-    sampled_specs, sampled_min_max_values = select_spectrograms(
+    sampled_specs, sampled_min_max_values, sampled_file_paths = select_spectrograms(
         specs, file_paths, min_max_values, num_spectrograms=5
     )
 
@@ -83,8 +84,9 @@ if __name__ == "__main__":
     original_signals = sound_generator.convert_spectrograms_to_audio(
         sampled_specs, sampled_min_max_values
     )
-
+    
     # Save audio signals
-    save_signals(signals, SAVE_DIR_GENERATED)
-    save_signals(original_signals, SAVE_DIR_ORIGINAL)
+    save_signals(signals, SAVE_DIR_GENERATED, sampled_file_paths)
+    save_signals(original_signals, SAVE_DIR_ORIGINAL, sampled_file_paths)
     print("AUDIO Generated!")
+

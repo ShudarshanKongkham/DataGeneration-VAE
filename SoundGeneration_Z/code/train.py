@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # os.chdir("G:/UTS/2024/Spring_2024/Advance Data Algorithm and Machine Learning/DataGeneration-VAE/SoundGeneration_Z")
 LEARNING_RATE = 0.001
 BATCH_SIZE = 4
-EPOCHS = 5
+EPOCHS = 150
 
 SPECTROGRAMS_PATH = "dataset/spectrograms"
 
@@ -67,26 +67,26 @@ if __name__ == "__main__":
     print(x_train.shape)
 
     # # Start training
-    # autoencoder, history = train(x_train, LEARNING_RATE, BATCH_SIZE, EPOCHS)
-    # autoencoder.save("model")
-    # save_history_and_plot(history)
+    autoencoder, history = train(x_train, LEARNING_RATE, BATCH_SIZE, EPOCHS)
+    autoencoder.save("model")
+    save_history_and_plot(history)
 
     """ RESUME TRAINING from  specific weight """
-    # # Specify the epoch from which you want to resume training
-    checkpoint_epoch = '195y'  # For example, epoch 120
-    checkpoint_folder = f"./model_checkpoints/epoch_{checkpoint_epoch}"
+    # # # Specify the epoch from which you want to resume training
+    # checkpoint_epoch = '195y'  # For example, epoch 120
+    # checkpoint_folder = f"./model_checkpoints/epoch_{checkpoint_epoch}"
 
-    # Load the autoencoder from the checkpoint
-    autoencoder = VAE.load(checkpoint_folder)
+    # # Load the autoencoder from the checkpoint
+    # autoencoder = VAE.load(checkpoint_folder)
 
-    # # Compile with a new learning rate
-    new_learning_rate = 0.0001  # Adjust based on your needs
-    # autoencoder.compile(learning_rate=new_learning_rate)
+    # # # Compile with a new learning rate
+    # new_learning_rate = 0.0001  # Adjust based on your needs
+    # # autoencoder.compile(learning_rate=new_learning_rate)
 
-    # Continue training
-    batch_size = 4  # Adjust as needed
-    num_epochs = 5  # Number of epochs to continue training
-    # history = autoencoder.train(x_train, batch_size, num_epochs)
-    autoencoder, history = train(x_train, new_learning_rate, batch_size, num_epochs)
-    autoencoder.save("model")
-    # save_history_and_plot(history)
+    # # Continue training
+    # batch_size = 4  # Adjust as needed
+    # num_epochs = 100  # Number of epochs to continue training
+    # # history = autoencoder.train(x_train, batch_size, num_epochs)
+    # autoencoder, history = train(x_train, new_learning_rate, batch_size, num_epochs)
+    # autoencoder.save("model")
+    # # save_history_and_plot(history)

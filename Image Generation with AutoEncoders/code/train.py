@@ -125,8 +125,9 @@ if __name__ == "__main__":
     # Train the autoencoder on a subset of the training data (first 10,000 samples)
     # autoencoder = train(x_train[:10000], LEARNING_RATE, BATCH_SIZE, EPOCHS)
     autoencoder, history = train_plotLoss(x_train[:10000], LEARNING_RATE, BATCH_SIZE, EPOCHS)
-    # Plot the loss curve
-    plot_loss_curve(history.history)
-    
     # Save the trained autoencoder model to a file
     autoencoder.save("model")
+    # Plot the loss curve
+    plot_loss_curve(history)
+    
+    

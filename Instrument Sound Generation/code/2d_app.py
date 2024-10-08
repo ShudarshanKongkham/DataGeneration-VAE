@@ -208,14 +208,15 @@ class LatentSpaceExplorer(tk.Tk):
         # Plot waveform
         times = np.arange(len(signal)) / SAMPLE_RATE
         self.ax_waveform.plot(times, signal)
-        self.ax_waveform.set_title("Waveform")
+        self.ax_waveform.set_title("\nWaveform")
         self.ax_waveform.set_xlabel("Time [s]")
         self.ax_waveform.set_ylabel("Amplitude")
 
         # Plot spectrogram
         spectrogram = spectrogram.squeeze()
-        self.ax_spectrogram.imshow(spectrogram.T, origin='lower', aspect='auto', cmap='inferno')
-        self.ax_spectrogram.set_title("Spectrogram")
+        # self.ax_spectrogram.imshow(spectrogram.T, origin='lower', aspect='auto', cmap='inferno')
+        self.ax_spectrogram.imshow(spectrogram, origin='lower', aspect='auto', cmap='inferno')
+        self.ax_spectrogram.set_title("\nSpectrogram")
         self.ax_spectrogram.set_xlabel("Time Frames")
         self.ax_spectrogram.set_ylabel("Frequency Bins")
 

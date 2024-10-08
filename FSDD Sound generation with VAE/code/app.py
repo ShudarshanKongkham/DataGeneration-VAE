@@ -100,7 +100,7 @@ class LatentSpaceExplorer(tk.Tk):
             c=self.sample_labels,
             cmap="tab10",
             alpha=0.5,
-            s=2
+            s=50
         )
         self.ax.set_title("Latent Space Representation")
         self.figure.colorbar(scatter, ax=self.ax)

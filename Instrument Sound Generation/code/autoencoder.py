@@ -259,6 +259,8 @@ class VAE:
 
 
 if __name__ == "__main__":
+    from tensorflow.keras.utils import plot_model
+
     autoencoder = VAE(
         input_shape=(256, 128, 1),
         conv_filters=(512, 256, 128, 64, 32),
@@ -267,6 +269,8 @@ if __name__ == "__main__":
         latent_space_dim=128
     )
     autoencoder.summary()
-
+    # Visualize the model and save it to a file
+    plot_model(autoencoder.model, to_file='vae_model.png', show_shapes=True, show_layer_names=True,
+                expand_nested=True)  # Expands details for encoder and decoder)
 
 

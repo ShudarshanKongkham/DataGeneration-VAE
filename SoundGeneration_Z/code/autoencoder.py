@@ -13,6 +13,8 @@ from tensorflow.keras.initializers import HeNormal
 from tensorflow.keras.layers import LeakyReLU
 
 
+
+
 tf.compat.v1.disable_eager_execution()
 
 def calculate_reconstruction_loss(y_target, y_predicted):
@@ -259,6 +261,7 @@ class VAE:
 
 
 if __name__ == "__main__":
+    from tensorflow.keras.utils import plot_model
     autoencoder = VAE(
         input_shape=(256, 128, 1),
         conv_filters=(512, 256, 128, 64, 32),
@@ -269,3 +272,5 @@ if __name__ == "__main__":
     autoencoder.summary()
 
 
+    # Plot the autoencoder model, using the autoencoder.model (which is a Keras Model object)
+    plot_model(autoencoder.model, to_file='autoencoder_model.png', show_shapes=True, show_layer_names=True)
